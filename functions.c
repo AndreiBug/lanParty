@@ -16,6 +16,20 @@ void open_output_file(FILE **f) {
     }
 }
 
+void addAtBeginning (struct Team **head , char* name, int player_nr, int teams_nr, char* firstName, char* secondName, float points)
+{
+struct Team* newNode = (struct Team*) malloc (sizeof(struct Team));
+newNode->name = name;
+newNode->player_nr = player_nr;
+newNode->teams_nr = teams_nr;
+newNode->player->firstName = firstName;
+newNode->player->secondName = secondName;
+newNode->player->points = points;
+
+newNode->next = *head ;
+*head = newNode;
+}
+
 void deleteList (struct Team **head){
     struct Team *headcopy;
     while (*head != NULL){

@@ -14,6 +14,11 @@ int main() {
     int number_of_teams = team->teams_nr;
     int number_of_players;
 
+    /*char *name, *firstName, *secondName;
+    int number_of_teams, teams_nr;
+    float points;*/
+    //fac varibile pentru fiecare element din lista si il adaug dupa la inceputul listei
+    
     for (int i = 0; i < number_of_teams; i++) {
         aux_previous = NULL;
         team->next = NULL;
@@ -30,10 +35,8 @@ int main() {
         length = strlen(team->name);
         if (team->name[length - 1] == ' ') {  // CE NU MERGE
             while (length > 0 && team->name[length - 1] == ' ') {
-                length = length - 1;
+                strcpy(team->name + (length - 1), team->name + length);
             }
-            team->name[length] = '\n';
-            team->name[length + 1] = '\0';
         }
 
         int x = 0;
@@ -73,25 +76,22 @@ int main() {
 
     float min;
     while (number_of_teams != n) {
-        min = INT_MAX;
         struct Team* current = head_team;
-
+        min = INT_MAX;
         while (current != NULL) {
             struct Player* player = current->head_player;
             current->team_points = 0;
-            for (int j = 0; j < number_of_players; j++) {
+            
+            while(player != NULL) {
                 current->team_points = current->team_points + player->points;
                 player = player->next;
             }
-
             current->team_points = current->team_points / number_of_players;
-
             if (min > current->team_points) {
                 min = current->team_points;
             }
             current = current->next;
         }
-        // seg fault
         deleteMin(&head_team, min);
         number_of_teams--;
     }
@@ -99,6 +99,7 @@ int main() {
     team = head_team;
     for (int i = 0; i < number_of_teams; i++) {
         fputs(team->name, output_file);
+        printf("%s - %.2f\n", team->name, team->team_points);
         fprintf(output_file, "\n");
         team = team->next;
     }
@@ -111,7 +112,7 @@ int main() {
     struct Stack_Match* winners = NULL;  // stive
     struct Stack_Match* losers = NULL;
 
-    team = head_team;
+    /*team = head_team;
     int round_nr = 1;
     while (number_of_teams != 8) {
         fprintf(output_file, "--- ROUND NO:%d \n", round_nr);
@@ -191,7 +192,7 @@ int main() {
         number_of_teams = number_of_teams / 2;
         round_nr++;
         }
-    }
+    }*/
     fclose(input_file);
     fclose(output_file);
 }   

@@ -36,6 +36,8 @@ void open_input_file(FILE **f);
 
 void open_output_file(FILE **f);
 
+void addAtBeginning (struct Team **head , char* name, int player_nr, int teams_nr, char* firstName, char* secondName, float points);
+
 void deleteList(struct Team **head);
 
 void delete_min(struct Team** head, float value);
