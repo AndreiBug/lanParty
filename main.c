@@ -1,11 +1,10 @@
 #include "functions.c"
 
-int main() {
-    FILE* input_file = NULL;
-    FILE* output_file = NULL;
-    open_input_file(&input_file);
-    open_output_file(&output_file);
-    struct Team* team = (struct Team*)malloc(sizeof(struct Team));
+int main( int argc, char *argv[] ) { 
+    FILE* input_file = fopen(argv[2], "r");
+    FILE* output_file = fopen(argv[3], "w");
+    FILE* tasks = fopen(argv[1], "r");
+    struct Team* team = (struct Team*)malloc(sizeof(struct Team)); ////////////////////////////task1////////////////////////////
     struct Team* head_team = team;
     struct Team* aux = NULL;
     struct Player* head_player = NULL;
@@ -13,32 +12,21 @@ int main() {
     fscanf(input_file, "%d", &team->teams_nr);
     int number_of_teams = team->teams_nr;
     int number_of_players;
-
-    /*char *name, *firstName, *secondName;
-    int number_of_teams, teams_nr;
-    float points;*/
-    //fac varibile pentru fiecare element din lista si il adaug dupa la inceputul listei
+    int cerinte[5];
+    for (int i = 0; i < 5; i++){
+        fscanf(tasks, "%d", &(cerinte[i]));
+    }
     
+    team->next = NULL;
     for (int i = 0; i < number_of_teams; i++) {
         aux_previous = NULL;
-        team->next = NULL;
-        fscanf(input_file, "%d ", &team->player_nr);
-
+        fscanf(input_file, "%d", &team->player_nr);
+        
         number_of_players = team->player_nr;
-
-        team->name = (char*)malloc(sizeof(char) * 30);
-        fgets(team->name, 30, input_file);
-        int length = strlen(team->name);
-        if (team->name[length - 1] == '\n')
-            strcpy(team->name + (length - 1), team->name + length);
-
-        length = strlen(team->name);
-        if (team->name[length - 1] == ' ') {  // CE NU MERGE
-            while (length > 0 && team->name[length - 1] == ' ') {
-                strcpy(team->name + (length - 1), team->name + length);
-            }
-        }
-
+        
+        team->name = (char*)malloc(sizeof(char) * 50);
+        fgets(team->name, 50, input_file);
+        delete_endlines_spaces(team->name);
         int x = 0;
         for (int j = 0; j < number_of_players; j++) {
             team->player = malloc(sizeof(struct Player));
@@ -61,13 +49,15 @@ int main() {
             team->player->next = NULL;
             team->player = team->player->next;
         }
+        head_team = team;
         aux = (struct Team*)malloc(sizeof(struct Team));
-        team->next = aux;
         team->head_player = head_player;
-        team = team->next;
+        aux->next = team;
+        team = aux;
     }
     team = head_team;
 
+    if (cerinte[1] == 1){ ////////////////////////////task2////////////////////////////
     int n = 1;
     while (n <= number_of_teams) {
         n = n * 2;
@@ -95,104 +85,38 @@ int main() {
         deleteMin(&head_team, min);
         number_of_teams--;
     }
+    }
 
     team = head_team;
     for (int i = 0; i < number_of_teams; i++) {
-        fputs(team->name, output_file);
-        printf("%s - %.2f\n", team->name, team->team_points);
-        fprintf(output_file, "\n");
-        team = team->next;
-    }
+    fputs(team->name, output_file);
     fprintf(output_file, "\n");
+    team = team->next;
+    }
 
+    if (cerinte[2] == 1) { ////////////////////////////task3////////////////////////////
+    fprintf(output_file, "\n");
     struct Queue_Games* games = createQueue();  // coada
+    team = head_team;
     for (int i = 0; i < number_of_teams; i++) {
-        enQueue(games, team);
+        enQueue(games, team, head_player);
+        team = team->next;
     }
     struct Stack_Match* winners = NULL;  // stive
     struct Stack_Match* losers = NULL;
-
-    /*team = head_team;
     int round_nr = 1;
-    while (number_of_teams != 8) {
-        fprintf(output_file, "--- ROUND NO:%d \n", round_nr);
-        for (int i = 0; i < number_of_teams / 2; i++) {
-            char* table_line = (char*)malloc(sizeof(char) * (table_size + 1));
-            for (int j = 0; j < table_size; j++) {
-                table_line[j] = ' ';
-            }
-            table_line[33] = '-';
-            int k = 0;
-            while (team->name[k] != '\0') {
-                table_line[k] = team->name[k];
-                k++;
-            }
-
-            team = team->next;
-            int length = strlen(team->name), length_in_table = 0;
-            k = 0;
-            while (length_in_table != length + 1) {
-                table_line[table_size - k] = team->name[length - k];
-                length_in_table++;
-                k++;
-            }
-            team = team->next;
-            fprintf(output_file, "%s", table_line);
-            fprintf(output_file, "\n");
-        }
-
-        team = head_team;
-        while (team != NULL) {
-            if (team->team_points >= team->next->team_points) {
-                push(&winners, team);
-                push(&losers, team->next);
-                for (int i = 0; i < number_of_players; i++) {
-                    team->player->points = team->player->points + 1;
-                }
-                team->team_points = team->team_points + 1;
-            } else {
-                push(&losers, team);
-                push(&winners, team->next);
-                for (int i = 0; i < number_of_players; i++) {
-                    team->next->player->points = team->next->player->points + 1;
-                }
-                team->next->team_points = team->next->team_points + 1;
-            }
-            team = team->next->next;
-        }
-        deleteStack(&losers);
-        fprintf(output_file, "\n");
-        fprintf(output_file, "WINNERS OF ROUND NO:%d", round_nr);
-        char* winner_line = (char*)malloc(sizeof(char) * (winner_size + 1));
-        for (int i = 0; i < number_of_teams / 2; i++) {
-            for (int j = 0; j < winner_size; j++) {
-                winner_line[j] = ' ';
-            }   
-            winner_line[34] = '-';
-            //print winners
-            for (int i = 0; i < number_of_teams / 2; i++) {
-                struct Team* aux = pop(&winners);
-                int k = 0;
-                while (aux->name[k] != '\0') {
-                  winner_line[k] = aux->name[k];
-                  k++;
-                }
-                char* points = (char*)malloc(sizeof(char) * 8);
-                sprintf(points, "%f", aux->team_points);
-                int length = strlen(points), length_in_table = 0;
-                k = 0;
-                while (length_in_table != length + 1) {
-                    winner_line[winner_size - k] = points[length - k];
-                    length_in_table++;
-                    k++;
-                }
-            }
-        fprintf(output_file, "%s", winner_line);
-        fprintf(output_file, "\n");
-        number_of_teams = number_of_teams / 2;
-        round_nr++;
-        }
-    }*/
+    //while (number_of_teams != 8) {
+    show_games(output_file, number_of_teams, round_nr, head_player, games, &winners, &losers);
+    deleteStack(&losers);
+    deleteQueue(games);
+    games = createQueue();
+    struct Player* head_aux = head_player;
+    //show_winners(output_file, number_of_teams, round_nr, head_aux, games,&winners, &losers);
+    round_nr++;
+    //number_of_teams = number_of_teams / 2;
+    //}
+    }
     fclose(input_file);
     fclose(output_file);
-}   
+
+}
